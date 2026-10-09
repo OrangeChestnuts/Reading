@@ -25,27 +25,72 @@ button{padding:7px 12px}
 #status{margin-top:7px;font-size:10px;line-height:1.5;min-height:15px}
 details{margin-top:6px;line-height:1.6}
 @media(max-width:480px){body{padding:8px}main{padding:16px}h1{font-size:21px}.row{padding-top:10px}}
-/* Keep copy feedback accessible without adding visible footer text. */
+/* Keep export feedback accessible without adding visible footer text. */
 #status{position:absolute;width:1px;height:1px;min-height:0;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 </style>
 </head>
 <body><main>
 <header><p class="eyebrow">LIFE DASHBOARD</p><h1>人生儀表板</h1><p class="intro">拖動圓點或輸入分數，記下此刻的狀態。</p></header>
 <section aria-label="四項生活指標" id="indicators"></section>
-<footer><div class="actions"><button class="primary" id="copy">複製紀錄</button><button id="reset">全部回到 50</button></div><p id="status" role="status"></p><textarea id="copybox" aria-label="可複製的 Markdown 紀錄" readonly hidden></textarea></footer>
+<footer><div class="actions"><button class="primary" id="export-image">儲存成圖片</button><button id="reset">全部回到 50</button></div><p id="status" role="status"></p></footer>
 </main>
 <script>
 (()=>{'use strict';
 const metrics=[['health','健康','#4aa777'],['work','工作','#539cdb'],['play','遊戲','#e6b936'],['love','愛','#df7270']];
 const key='life-dashboard:v1:'+location.pathname;let values={work:50,play:50,love:50,health:50};const status=document.getElementById('status');
 const valid=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=100;
-try{const saved=JSON.parse(localStorage.getItem(key));if(saved)for(const [id] of metrics)if(valid(saved[id]))values[id]=Math.round(saved[id]);status.textContent='可隨時調整；分數會暫存在此裝置。'}catch(e){status.textContent='此環境無法暫存，請複製紀錄到筆記保存。'}
+try{const saved=JSON.parse(localStorage.getItem(key));if(saved)for(const [id] of metrics)if(valid(saved[id]))values[id]=Math.round(saved[id]);status.textContent='可隨時調整；分數會暫存在此裝置。'}catch(e){status.textContent='此環境無法暫存，請儲存成圖片保留紀錄。'}
 const controls={};
 for(const [id,label,color]of metrics){const row=document.createElement('div');row.className='row';row.style.setProperty('--color',color);row.innerHTML=`<div class="row-head"><label class="name" for="${id}"><span class="dot" aria-hidden="true"></span>${label}</label><div class="score"><input type="number" id="${id}-number" min="0" max="100" step="1" inputmode="numeric" aria-label="${label}分數"><span>/ 100</span></div></div><input id="${id}" type="range" min="0" max="100" step="1" aria-label="${label}"><div class="ticks" aria-hidden="true"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>`;document.getElementById('indicators').append(row);const range=row.querySelector('[type=range]'),number=row.querySelector('[type=number]');controls[id]={range,number};range.addEventListener('input',()=>update(id,Number(range.value)));number.addEventListener('input',()=>{if(number.value!==''&&Number.isFinite(number.valueAsNumber))update(id,number.valueAsNumber)});number.addEventListener('change',()=>update(id,number.value===''?values[id]:Number(number.value)));draw(id);}
 function draw(id){const {range,number}=controls[id];range.value=number.value=values[id];range.style.setProperty('--value',values[id]+'%');range.setAttribute('aria-valuetext',values[id]+' 分');}
-function save(){try{localStorage.setItem(key,JSON.stringify(values));status.textContent='已暫存於此裝置 · 複製紀錄可保留到每日筆記。'}catch(e){status.textContent='此環境無法暫存，請複製紀錄到筆記保存。'}}
-function update(id,v){if(!Number.isFinite(v))return;values[id]=Math.max(0,Math.min(100,Math.round(v)));draw(id);save();document.getElementById('copybox').hidden=true;}
-document.getElementById('reset').onclick=()=>{for(const[id]of metrics){values[id]=50;draw(id)}save();document.getElementById('copybox').hidden=true;};
-document.getElementById('copy').onclick=async()=>{const now=new Date();const date=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');const text='### 人生儀表板｜'+date+'\n\n'+metrics.map(([id,label])=>'- '+label+'：'+values[id]+' / 100').join('\n');try{await navigator.clipboard.writeText(text);status.textContent='已複製，貼到 Obsidian 筆記即可。';}catch(e){const box=document.getElementById('copybox');box.hidden=false;box.value=text;box.focus();box.select();status.textContent='請複製下方文字，貼到 Obsidian 筆記。';}};
+function save(){try{localStorage.setItem(key,JSON.stringify(values));status.textContent='已暫存於此裝置 · 可儲存成圖片保留紀錄。'}catch(e){status.textContent='此環境無法暫存，請儲存成圖片保留紀錄。'}}
+function update(id,v){if(!Number.isFinite(v))return;values[id]=Math.max(0,Math.min(100,Math.round(v)));draw(id);save();}
+document.getElementById('reset').onclick=()=>{for(const[id]of metrics){values[id]=50;draw(id)}save();};
+const exportButton=document.getElementById('export-image');
+exportButton.onclick=()=>{
+  const now=new Date(), snapshot={...values};
+  const pad=n=>String(n).padStart(2,'0');
+  const date=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  const time=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+  const offset=-now.getTimezoneOffset();
+  const zone='UTC'+(offset>=0?'+':'-')+pad(Math.floor(Math.abs(offset)/60))+':'+pad(Math.abs(offset)%60);
+  const canvas=document.createElement('canvas');
+  canvas.width=1440;canvas.height=960;
+  const ctx=canvas.getContext('2d');
+  if(!ctx){alert('此環境無法產生圖片，請在瀏覽器開啟儀表板後重試。');return;}
+  ctx.scale(2,2);
+  const ink='#26352f', muted='#788178', track='#e9ebe4';
+  const font='-apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif';
+  function text(content,x,y,size,color=ink,weight=400,align='left'){
+    ctx.font=weight+' '+size+'px '+font;ctx.fillStyle=color;ctx.textAlign=align;ctx.fillText(content,x,y);
+  }
+  function line(x1,y1,x2,y2,color,width=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();}
+  function bar(x,y,w,h,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,h/2);ctx.fill();}
+  ctx.fillStyle='#fffefa';ctx.fillRect(0,0,720,480);
+  text('人生儀表板',40,52,26,ink,600);
+  text(date+'  '+time+'  '+zone,40,78,12,muted);
+  line(40,96,680,96,'#e5e7df');
+  metrics.forEach(([id,label,color],index)=>{
+    const y=127+index*76;
+    ctx.fillStyle=color;ctx.beginPath();ctx.arc(45,y-5,4.5,0,Math.PI*2);ctx.fill();
+    text(label,60,y,17,ink,600);
+    text(snapshot[id]+' / 100',680,y,18,ink,600,'right');
+    bar(40,y+13,640,12,track);
+    const fill=640*snapshot[id]/100;
+    if(fill>0){ctx.save();ctx.beginPath();ctx.roundRect(40,y+13,640,12,6);ctx.clip();ctx.fillStyle=color;ctx.fillRect(40,y+13,fill,12);ctx.restore();}
+    [0,25,50,75,100].forEach(v=>text(String(v),40+640*v/100,y+41,10,muted,400,v===0?'left':v===100?'right':'center'));
+  });
+  line(40,416,680,416,'#e5e7df');
+  text('此刻的生活狀態',40,446,12,muted);
+  text('0–100',680,446,12,muted,400,'right');
+  canvas.toBlob(blob=>{
+    if(!blob){alert('圖片產生失敗，請再試一次。');return;}
+    const url=URL.createObjectURL(blob), link=document.createElement('a');
+    link.href=url;link.download='人生儀表板_'+date+'_'+time.replaceAll(':','-')+'.png';
+    document.body.appendChild(link);link.click();link.remove();
+    status.textContent='已產生圖片，日期時間為 '+date+' '+time+' '+zone;
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  },'image/png');
+};
 })();
 </script></body></html>
