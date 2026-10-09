@@ -15,7 +15,7 @@
 </main>
 <script>
 (()=>{'use strict';
-const metrics=[['work','工作','#4aa777'],['play','遊戲','#539cdb'],['love','愛','#e6b936'],['health','健康','#df7270']];
+const metrics=[['health','健康','#4aa777'],['work','工作','#539cdb'],['play','遊戲','#e6b936'],['love','愛','#df7270']];
 const key='life-dashboard:v1:'+location.pathname;let values={work:50,play:50,love:50,health:50};const status=document.getElementById('status');
 const valid=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=100;
 try{const saved=JSON.parse(localStorage.getItem(key));if(saved)for(const [id] of metrics)if(valid(saved[id]))values[id]=Math.round(saved[id]);status.textContent='可隨時調整；分數會暫存在此裝置。'}catch(e){status.textContent='此環境無法暫存，請複製紀錄到筆記保存。'}
