@@ -6,10 +6,29 @@
 <style>
 :root{color-scheme:light dark;--bg:#f5f4f0;--card:#fffefa;--ink:#26352f;--muted:#7b827b;--line:#e5e7df;--track:#e9ebe4;--field:#f5f5ef}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;padding:28px 18px}main{max-width:720px;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:32px 36px;box-shadow:0 12px 40px #23392a08}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--muted);margin:0 0 12px}header{border-bottom:1px solid var(--line);padding-bottom:22px}h1{font-size:28px;letter-spacing:3px;margin:0 0 10px;font-weight:600}.intro{font-size:13px;color:var(--muted);line-height:1.8;margin:0}.row{padding-top:25px}.row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.name{display:flex;gap:10px;align-items:center;font-size:17px;font-weight:600}.dot{width:9px;height:9px;border-radius:50%;background:var(--color)}.score{display:flex;align-items:baseline;gap:5px;color:var(--muted);font-size:12px}input[type=number]{font:600 26px/1.2 inherit;font-family:inherit;font-size:26px;font-weight:600;color:var(--ink);border:0;border-bottom:1px solid transparent;background:transparent;width:65px;text-align:right;border-radius:4px;padding:3px;-moz-appearance:textfield}input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]:hover{border-color:var(--line)}input[type=range]{appearance:none;-webkit-appearance:none;display:block;width:100%;height:38px;margin:0;background:transparent;cursor:pointer;--value:50%}input[type=range]::-webkit-slider-runnable-track{height:12px;border-radius:20px;background:linear-gradient(to right,var(--color) 0 var(--value),var(--track) var(--value) 100%)}input[type=range]::-moz-range-track{height:12px;border-radius:20px;background:linear-gradient(to right,var(--color) 0 var(--value),var(--track) var(--value) 100%)}input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:25px;height:25px;border-radius:50%;background:var(--card);border:4px solid var(--color);margin-top:-6.5px;box-shadow:0 2px 5px #0002}input[type=range]::-moz-range-thumb{box-sizing:border-box;width:25px;height:25px;border-radius:50%;background:var(--card);border:4px solid var(--color);box-shadow:0 2px 5px #0002}:focus-visible{outline:2px solid var(--ink);outline-offset:4px}.ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);padding:0 3px;font-variant-numeric:tabular-nums}footer{margin-top:27px;border-top:1px solid var(--line);padding-top:20px}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--field);color:var(--ink);padding:10px 15px;border-radius:9px;cursor:pointer}button.primary{background:var(--ink);color:var(--card);border-color:var(--ink)}#status{font-size:11px;color:var(--muted);margin:12px 0 0;line-height:1.7;min-height:19px}details{margin-top:15px;font-size:11px;color:var(--muted);line-height:1.9}summary{cursor:pointer}textarea{width:100%;height:150px;margin-top:14px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:inherit}#copybox[hidden]{display:none}@media(max-width:480px){body{padding:12px 8px}main{padding:24px 20px;border-radius:18px}h1{font-size:25px}.row{padding-top:21px}}@media(prefers-color-scheme:dark){:root{--bg:#191e1b;--card:#222924;--ink:#e3e9e2;--muted:#a0aca0;--line:#384139;--track:#3c453e;--field:#2b332d}}@media print{body{background:white}main{box-shadow:none}footer{display:none}}
+/* Compact layout for embedded notes. */
+body{padding:10px 12px}
+main{padding:18px 24px;border-radius:16px}
+.eyebrow{display:none}
+header{padding-bottom:12px}
+h1{font-size:22px;letter-spacing:2px;margin-bottom:5px}
+.intro{font-size:12px;line-height:1.5}
+.row{padding-top:10px}
+.row-head{margin-bottom:0}
+.name{font-size:15px;gap:8px}
+input[type=number]{font-size:21px;line-height:1.2;width:54px;padding:0 3px}
+input[type=range]{height:32px}
+.ticks{font-size:9px;line-height:1.2}
+footer{margin-top:14px;padding-top:12px}
+.actions{gap:8px}
+button{padding:7px 12px}
+#status{margin-top:7px;font-size:10px;line-height:1.5;min-height:15px}
+details{margin-top:6px;line-height:1.6}
+@media(max-width:480px){body{padding:8px}main{padding:16px}h1{font-size:21px}.row{padding-top:10px}}
 </style>
 </head>
 <body><main>
-<header><p class="eyebrow">LIFE DASHBOARD</p><h1>人生儀表板</h1><p class="intro">停下來，看看此刻的自己。<br>拖動圓點或直接輸入分數，記下四個面向的狀態。</p></header>
+<header><p class="eyebrow">LIFE DASHBOARD</p><h1>人生儀表板</h1><p class="intro">拖動圓點或輸入分數，記下此刻的狀態。</p></header>
 <section aria-label="四項生活指標" id="indicators"></section>
 <footer><div class="actions"><button class="primary" id="copy">複製紀錄</button><button id="reset">全部回到 50</button></div><p id="status" role="status"></p><textarea id="copybox" aria-label="可複製的 Markdown 紀錄" readonly hidden></textarea><details><summary>關於分數與保存</summary><p>0 代表非常不滿意，100 代表非常滿意；四項分數彼此獨立，不必加總為 100。初始值皆為 50，可依照你自己的定義調整。</p><p>若執行環境允許，分數會暫存在目前瀏覽器或裝置。這不會寫入 HTML 檔，也不會隨 Obsidian 同步到其他裝置。需要保留每日紀錄，請按「複製紀錄」貼到筆記中。</p></details></footer>
 </main>
